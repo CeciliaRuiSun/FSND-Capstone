@@ -1,7 +1,8 @@
 import os
 from flask import Flask,request, abort, jsonify
-from models import setup_db, Category, Item
+from models import commit_session, setup_db, Category, Item
 from flask_cors import CORS
+from sqlalchemy import insert
 
 ITEMS_PER_PAGE = 10
 
@@ -61,48 +62,67 @@ def create_app(test_config=None):
     def create_item():
         body = request.get_json()
 
-        new_item = body.get("item", None)
-        new_brand = body.get("brand", None)
-        new_category = body.get("category", None)
-        new_comment = body.get("comment", None)
+        new_title = body.get("title")
+        new_brand = body.get("brand")
+        new_category = body.get("category")
+        new_comment = body.get("comment")
 
-        if new_item == None or new_brand == None or new_category == None or new_comment == None:
+        if new_title is None or new_brand is None or new_category is None or new_comment is None:
             abort(422)
 
         try:
-            item = Item(item=new_item, brand=new_brand,
-                                category=new_category, comment=new_comment)
+            item = Item(title=new_title, brand=new_brand, category=new_category, comment=new_comment)
             item.insert()
-
+            
+            commit_session()
             current_items = paginate_items(request)
 
             return jsonify(
                 {
                     "success": True,
-                    "created": item.id,
                     "items": current_items,
                     "total_items": len(Item.query.all()),
                 }
             )
-        except:
+        except Exception as ex:
             abort(422)
         
     
     @app.route('/items/<int:item_id>', methods=["PATCH"])
-    def modify_item():
+    def modify_item(item_id):
         body = request.get_json()
 
-        current_item = Item.query.filter(Item.id == id).one_or_none()
+        current_item = Item.query.filter(Item.id == item_id)
         if current_item is None:
             abort(422)
 
         try:
-            current_item.update().values({
-                "item": body.get("item", current_item.item), 
-                "brand": body.get("item", current_item.item), 
-                "category": body.get("category", current_item.brand),
-                "comment": body.get("comment", current_item.comment) })
-        except:
+            new_title = body.get("title")
+            new_brand = body.get("brand")
+            new_category = body.get("category")
+            new_comment = body.get("comment")
+            
+            if new_title is None or new_brand is None or new_category is None or new_comment is None:
+                abort(422)
+
+            ret = current_item.update({
+                "title": body.get("title", current_item.one_or_none().format().get('title')),
+                "brand": body.get("brand", current_item.one_or_none().format().get('brand')),
+                "category": body.get("category", current_item.one_or_none().format().get('category')),
+                "comment": body.get("comment", current_item.one_or_none().format().get('comment'))
+                }, synchronize_session='fetch')
+            
+            commit_session()
+
+            return jsonify(
+                {
+                    "success": True,
+                    "updated": item_id,
+                    "items": current_item.one_or_none().format(),
+                    "total_items": len(Item.query.all()),
+                }
+            )
+        except Exception as ex:
             abort(422)
 
             
