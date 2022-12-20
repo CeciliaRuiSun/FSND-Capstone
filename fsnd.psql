@@ -122,7 +122,7 @@ COPY public.categories (id, type) FROM stdin;
 -- Data for Name: items; Type: TABLE DATA; Schema: public; Owner: rs
 --
 
-COPY public.items (id, item, answer, difficulty, category) FROM stdin;
+COPY public.items (id, title, brand, category, comment) FROM stdin;
 1	Nacho Cheese Flavored Tortilla Chips	Doritos	1	An old favorite of mine and I keep a bag at all times.
 2	Cranberry Orange Breakfast Biscuits	belVita	2	Perfect for Breakfast on the Go
 3	Chocolate Sanwich Cookies	OREO	2	So good, crispy and taste great
@@ -134,7 +134,6 @@ COPY public.items (id, item, answer, difficulty, category) FROM stdin;
 9	Milk Chocolate Dipped Pretzels	Hershey's	5	Would eat it non stop.
 10	Ocean Spray original Dried Cranberries	Craisins	3	They are sweet and moist. Not grainy or crumbly.
 11	Amazin Pitted Prunes	Sunsweet	3	Great price for the amount of prunes.   
-
 \.
 
 

@@ -1,12 +1,11 @@
 import os
-from sqlalchemy import Column, String, create_engine
+from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
-database_path = os.environ['DATABASE_URL']
-if database_path.startswith("postgres://"):
-  database_path = database_path.replace("postgres://", "postgresql://", 1)
-
+DB_HOST = os.getenv('DB_HOST', 'localhost:5432')  
+DB_NAME = os.getenv('DB_NAME', 'fsnd') 
+database_path = 'postgresql://{}/{}'.format(DB_HOST, DB_NAME)
 db = SQLAlchemy()
 
 '''
@@ -20,24 +19,59 @@ def setup_db(app, database_path=database_path):
     db.init_app(app)
     db.create_all()
 
+def commit_session():
+    db.session.commit()
 
-'''
-Person
-Have title and release year
-'''
-class Person(db.Model):  
-  __tablename__ = 'People'
+"""
+Category
 
-  id = Column(db.Integer, primary_key=True)
-  name = Column(String)
-  catchphrase = Column(String)
+"""
+class Category(db.Model):
+    __tablename__ = 'categories'
 
-  def __init__(self, name, catchphrase=""):
-    self.name = name
-    self.catchphrase = catchphrase
+    id = Column(Integer, primary_key=True)
+    type = Column(String)
 
-  def format(self):
-    return {
-      'id': self.id,
-      'name': self.name,
-      'catchphrase': self.catchphrase}
+    def __init__(self, type):
+        self.type = type
+
+    def format(self):
+        return {
+            'id': self.id,
+            'type': self.type
+            }
+
+class Item(db.Model):
+    __tablename__ = 'items'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String)
+    brand = Column(String)
+    category = Column(Integer)
+    comment = Column(String)
+
+    def __init__(self, title, brand, category, comment):
+        self.title = title
+        self.brand = brand
+        self.category = category
+        self.comment = comment
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def format(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'brand': self.brand,
+            'category': self.category,
+            'comment': self.comment
+            }
