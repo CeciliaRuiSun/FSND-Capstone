@@ -3,6 +3,7 @@ from flask import Flask,request, abort, jsonify
 from models import commit_session, setup_db, Category, Item
 from flask_cors import CORS
 from sqlalchemy import insert
+from auth import AuthError, requires_auth
 
 ITEMS_PER_PAGE = 10
 
@@ -59,6 +60,7 @@ def create_app(test_config=None):
         )
     
     @app.route('/items', methods=["POST"])
+    @requires_auth('post:item')
     def create_item():
         body = request.get_json()
 
@@ -89,6 +91,7 @@ def create_app(test_config=None):
         
     
     @app.route('/items/<int:item_id>', methods=["PATCH"])
+    @requires_auth('patch:item')
     def modify_item(item_id):
         body = request.get_json()
 
@@ -127,6 +130,7 @@ def create_app(test_config=None):
 
             
     @app.route('/items/<int:item_id>', methods=["DELETE"])
+    @requires_auth('delete:item')
     def delete_item(item_id):
         item = Item.query.filter(
             Item.id == item_id).one_or_none()
@@ -172,6 +176,15 @@ def create_app(test_config=None):
     def bad_request(error):
         return jsonify({"success": False, "error": 400, "message": "bad request"}), 400
 
+    
+    @app.errorhandler(AuthError)
+    def handle_auth_error(ex):
+        return jsonify({
+            "success": False,
+            "error": ex.status_code,
+            'message': ex.error
+        }), 401
+        
     return app
 
 app = create_app()
