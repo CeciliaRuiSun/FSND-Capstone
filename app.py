@@ -63,7 +63,7 @@ def create_app(test_config=None):
     @requires_auth('post:item')
     def create_item():
         body = request.get_json()
-
+        
         new_title = body.get("title")
         new_brand = body.get("brand")
         new_category = body.get("category")
@@ -94,7 +94,7 @@ def create_app(test_config=None):
     @requires_auth('patch:item')
     def modify_item(item_id):
         body = request.get_json()
-
+        print('patch body', body)
         current_item = Item.query.filter(Item.id == item_id)
         if current_item is None:
             abort(422)
@@ -184,7 +184,7 @@ def create_app(test_config=None):
             "error": ex.status_code,
             'message': ex.error
         }), 401
-        
+
     return app
 
 app = create_app()
