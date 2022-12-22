@@ -97,17 +97,9 @@ def create_app(test_config=None):
         print('patch body', body)
         current_item = Item.query.filter(Item.id == item_id)
         if current_item is None:
-            abort(422)
+            abort(404)
 
         try:
-            new_title = body.get("title")
-            new_brand = body.get("brand")
-            new_category = body.get("category")
-            new_comment = body.get("comment")
-            
-            if new_title is None or new_brand is None or new_category is None or new_comment is None:
-                abort(422)
-
             ret = current_item.update({
                 "title": body.get("title", current_item.one_or_none().format().get('title')),
                 "brand": body.get("brand", current_item.one_or_none().format().get('brand')),
