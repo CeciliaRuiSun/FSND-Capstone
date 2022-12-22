@@ -81,3 +81,5 @@ VISITOR
 ADMIN
 - Permissions: GET `'/categories'`, GET `'/items'`, DELETE `'/items/<int:item_id>'`, PATCH `'/items/<int:item_id>'`
 
+
+

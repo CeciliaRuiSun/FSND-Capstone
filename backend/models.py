@@ -5,7 +5,7 @@ import json
 
 DB_HOST = os.getenv('DB_HOST', 'localhost:5432')  
 DB_NAME = os.getenv('DB_NAME', 'fsnd') 
-database_path = 'postgresql://{}/{}'.format(DB_HOST, DB_NAME)
+database_path = os.getenv('DATABASE_URL','postgresql://{}/{}'.format(DB_HOST, DB_NAME))
 db = SQLAlchemy()
 
 '''
