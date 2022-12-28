@@ -104,6 +104,8 @@ pip3 install -r requirements.txt
 
 - [SQLAlchemy](https://www.sqlalchemy.org/) is the Python SQL toolkit and ORM we'll use to handle the lightweight SQL database. You'll primarily work in `app.py`and can reference `models.py`.
 
+- [python-jose](https://pypi.org/project/python-jose/) The JavaScript Object Signing and Encryption (JOSE) technologies can be used to encrypt and/or sign content using a variety of algorithms. You'll primarily work in `auth.py` with `jwt` provided by `python-jose`. Please avoid using `python-jose-cryptodome` because it's not compatible to heroku's python environment.
+
 
 ### Set up the Database
 
@@ -128,5 +130,34 @@ To run the server, execute:
 
 ```bash
 FLASK_APP=app.py FLASK_DEBUG=True flask run
+```
+
+### Deploy on Heroku
+
+1. **Create a new app**
+```bash
+heroku create -a heroksp
+# For example, 
+# heroku create myapp-663697908 --buildpack heroku/python
+# https://myapp-663697908.herokuapp.com/ | https://git.heroku.com/myapp-663697908.git
+```
+This returns a `[heroku_remote_git_url]` which could be used in the next step.
+
+2. **Set up database**
+Create a database using `bit.io` and save the database url. Initiate databse using psql.
+
+3. **Set up environment variable**
+ Go to your Heroku Dashboard in the browser and access your application's settings. You will have to go to the Heroku dashboard >> Particular App >> Settings >> Reveal Config Vars section to add and set up variables.
+![alt text](heroku_variables.png "Environment Variables in Heroku")
+
+4. **Deploy**
+* Clone this repository
+* Add Heroku remote
+```bash
+git remote add heroku [heroku_remote_git_url]
+```
+* Push to heroku to trigger automatical build
+```bash
+git push heroku main
 ```
 
