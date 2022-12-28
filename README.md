@@ -1,11 +1,11 @@
 # FSND Final Project
 
-## Snack App
-
-Snack App is used to display various kinds of snacks by categories, as with comments from consumers. The application function includes:
-1. Display snacks. A snack (or item) should have its' brand, category and comment from consumers
-2. Update snacks
-3. Delete snacks
+## Gourmet App
+As a foreigner living in the country, who also likes delicious food, I often have problems choosing a snack or the right cooking ingredient in front of numorous options. As a result, I developed this app that gathers comments from consumers to help people like me find the right food they want.
+Gourmet App is used to display various kinds of items by categories, as with comments from consumers. The application function includes:
+1. Display item. An item should have its' brand, category and comment from consumers
+2. Update item
+3. Delete item
 
 ## APIs
 GET `'/categories'`
@@ -82,7 +82,7 @@ ADMIN
 - Permissions: GET `'/categories'`, GET `'/items'`, DELETE `'/items/<int:item_id>'`, PATCH `'/items/<int:item_id>'`
 
 
-# Backend - Snack App
+# Backend - Gourmet App
 
 ## Setting up the Backend
 
