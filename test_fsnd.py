@@ -4,7 +4,7 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 
 from app import create_app
-from models import setup_db, Category, Item
+from models import setup_db, Category, Item, Temp_comment, Comment
 
 class FSNDTestCase(unittest.TestCase):
     """This class represents the fsnd test case"""
@@ -65,7 +65,6 @@ class FSNDTestCase(unittest.TestCase):
         new_item = {
             'title': 'Crunchy Cheese Flavored Snack Chips',
             'brand': 'Cheetos',
-            'comment': 'Very good',
             'category': 1
         }
         total_items_old = len(Item.query.all())
@@ -80,7 +79,6 @@ class FSNDTestCase(unittest.TestCase):
     def test_create_item_fail(self):
         new_item = {
             'title': 'Crunchy Cheese Flavored Snack Chips',
-            'comment': 'Very good',
             'category': 1
             }
         res = self.client().post("/items", json=new_item)
@@ -94,7 +92,6 @@ class FSNDTestCase(unittest.TestCase):
             'id': 1,
             'title': 'Nacho Cheese Flavored Tortilla Chips',
             'brand': 'Doritos',
-            'comment': 'I will buy it again',
             'category': 1
         }
         res = self.client().patch("/items/1", json=new_item)
@@ -107,10 +104,9 @@ class FSNDTestCase(unittest.TestCase):
         new_item = {
             'id': 1,
             'title': 'Crunchy Cheese Flavored Snack Chips',
-            'comment': 'Very good',
             'category': 1
             }
-        res = self.client().patch("/items/1", json=new_item)
+        res = self.client().patch("/items/<int:new_item.get('id')>", json=new_item)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 422)
@@ -134,6 +130,101 @@ class FSNDTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "resource not found")
 
+
+    def test_add_temp_comment(self):
+        total_temp_comment = len(Temp_comment.query.all())
+        new_comment = {
+            'item': 1,
+            'comment': 'I will buy it again',
+            'rating': 4,
+            'userid': 2
+        }
+        res = self.client().post("/user/comments", json=new_comment)
+        data = json.loads(res.data)
+
+        total_temp_comment_new = len(Temp_comment.query.all())
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(total_temp_comment_new - total_temp_comment, 1)
+        
+    def test_add_temp_comment_fail(self):
+        new_comment = {
+            'item': 1000,
+            'comment': 'Very good',
+            'rating': 4,
+            'userid': 2
+        }
+            
+        res = self.client().post("/user/comments", json=new_comment)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+
+    def test_add_admin_comment(self):
+        new_comment = {
+            'item': 1,
+            'comment': 'I will buy it again',
+            'rating': 5,
+            'userid': 2
+        }
+
+        cnt_total_comment = len(Comment.query.all())
+        res = self.client().post("/admin/comments/1", json=new_comment)
+        data = json.loads(res.data)
+        cnt_total_comment_new = len(Comment.query.all())
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(cnt_total_comment_new - cnt_total_comment, 1)
+        
+    def test_add_admin_comment_fail(self):
+        new_comment = {
+            'item': 1000,
+            'comment': 'Very good',
+            'rating': 5,
+            'userid': 2
+            }
+        res = self.client().post("/admin/comments/1000", json=new_comment)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+
+    def test_delete_temp_comment(self):
+        total_comments = len(Temp_comment.query.all())
+        res = self.client().delete("/temp/comments/1")
+        data = json.loads(res.data)
+        total_comments_after_delete = len(Temp_comment.query.all())
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(total_comments - total_comments_after_delete, 1)
+
+    def test_delete_temp_comment_fail(self):
+        res = self.client().delete("/temp/comments/1000")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+        
+    def test_delete_comment(self):
+        total_comments = len(Comment.query.all())
+        res = self.client().delete("/admin/comments/2")
+        data = json.loads(res.data)
+        total_comments_after_delete = len(Comment.query.all())
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(total_comments - total_comments_after_delete, 1)
+
+    def test_delete_comment_fail(self):
+        res = self.client().delete("/admin/comments/1000")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
 
 if __name__ == "__main__":
     unittest.main()

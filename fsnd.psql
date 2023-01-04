@@ -62,8 +62,7 @@ CREATE TABLE public.items (
     id integer NOT NULL,
     title text,
     brand text,
-    category integer,
-    comment text
+    category integer
 );
 
 
@@ -122,18 +121,18 @@ COPY public.categories (id, type) FROM stdin;
 -- Data for Name: items; Type: TABLE DATA; Schema: public; Owner: rs
 --
 
-COPY public.items (id, title, brand, category, comment) FROM stdin;
-1	Nacho Cheese Flavored Tortilla Chips	Doritos	1	An old favorite of mine and I keep a bag at all times.
-2	Cranberry Orange Breakfast Biscuits	belVita	2	Perfect for Breakfast on the Go
-3	Chocolate Sanwich Cookies	OREO	2	So good, crispy and taste great
-4	Baked Barbecue Potato Crisps	Lay's	1	They are so perfect to what I enjoy in a chip
-5	Peanut Butter Sandwich Cookies	Nutter Butter	2	Fresh and delicious
-6	Blast O Butter Microwave Popcorn?	JOLLY TIME	4	Best popcorn ever, fully pops, great buttery taste.
-7	Peanut Butter Pretzel	Fannie May	5	Great flavor and crunch along with milk chocolate.
-8	Milk Chocolate Covered Pretzels?	Flipz	5	One of my favorites for chocolate covered pretzels
-9	Milk Chocolate Dipped Pretzels	Hershey's	5	Would eat it non stop.
-10	Ocean Spray original Dried Cranberries	Craisins	3	They are sweet and moist. Not grainy or crumbly.
-11	Amazin Pitted Prunes	Sunsweet	3	Great price for the amount of prunes.   
+COPY public.items (id, title, brand, category) FROM stdin;
+1	Nacho Cheese Flavored Tortilla Chips	Doritos	1
+2	Cranberry Orange Breakfast Biscuits	belVita	2
+3	Chocolate Sanwich Cookies	OREO	2
+4	Baked Barbecue Potato Crisps	Lay's	1
+5	Peanut Butter Sandwich Cookies	Nutter Butter	2
+6	Blast O Butter Microwave Popcorn?	JOLLY TIME	4
+7	Peanut Butter Pretzel	Fannie May	5
+8	Milk Chocolate Covered Pretzels?	Flipz	5
+9	Milk Chocolate Dipped Pretzels	Hershey's	5
+10	Ocean Spray original Dried Cranberries	Craisins	3
+11	Amazin Pitted Prunes	Sunsweet	3   
 \.
 
 
@@ -173,6 +172,176 @@ ALTER TABLE ONLY public.items
 
 ALTER TABLE ONLY public.items
     ADD CONSTRAINT category FOREIGN KEY (category) REFERENCES public.categories(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+-- New table
+
+--
+-- Name: temp_comments; Type: TABLE; Schema: public; Owner: rs
+--
+
+CREATE TABLE public.temp_comments (
+    id integer NOT NULL,
+    comment text,
+    rating float NOT NULL,
+    item integer NOT NULL,
+    userid integer NOT NULL
+);
+
+
+ALTER TABLE public.temp_comments OWNER TO rs;
+
+--
+-- Name: temp_comments_id_seq; Type: SEQUENCE; Schema: public; Owner: rs
+--
+
+CREATE SEQUENCE public.temp_comments_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.temp_comments_id_seq OWNER TO rs;
+
+--
+-- Name: temp_comments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rs
+--
+
+ALTER SEQUENCE public.temp_comments_id_seq OWNED BY public.temp_comments.id;
+
+
+--
+-- Name: comments; Type: TABLE; Schema: public; Owner: rs
+--
+
+CREATE TABLE public.comments (
+    id integer NOT NULL,
+    comment text,
+    rating float NOT NULL,
+    item integer NOT NULL,
+    userid integer NOT NULL
+);
+
+
+ALTER TABLE public.comments OWNER TO rs;
+
+--
+-- Name: comments_id_seq; Type: SEQUENCE; Schema: public; Owner: rs
+--
+
+CREATE SEQUENCE public.comments_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.comments_id_seq OWNER TO rs;
+
+--
+-- Name: comments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rs
+--
+
+ALTER SEQUENCE public.comments_id_seq OWNED BY public.comments.id;
+
+
+--
+-- Name: temp_comments id; Type: DEFAULT; Schema: public; Owner: rs
+--
+
+ALTER TABLE ONLY public.temp_comments ALTER COLUMN id SET DEFAULT nextval('public.temp_comments_id_seq'::regclass);
+
+
+--
+-- Name: comments id; Type: DEFAULT; Schema: public; Owner: rs
+--
+
+ALTER TABLE ONLY public.comments ALTER COLUMN id SET DEFAULT nextval('public.comments_id_seq'::regclass);
+
+
+--
+-- Data for Name: temp_comments; Type: TABLE DATA; Schema: public; Owner: rs
+--
+
+COPY public.temp_comments (id, comment, rating, item, userid) FROM stdin;
+1	On the bottom you're several big chunks of cheese I took a bite of one not realizing it wasn't a chip it was very salty and then looking in the bag there's four or five more cheese chunks in there	3	1	1
+2	Doritos Nacho Cheese flavor is the ULTIMATE snack. Great right out the bag or make a delicious Taco's. They are all very cheesy and crunchy.	5	1	1
+\.
+
+
+--
+-- Data for Name: comments; Type: TABLE DATA; Schema: public; Owner: rs
+--
+
+COPY public.comments (id, comment, rating, item, userid) FROM stdin;
+1	An old favorite of mine and I keep a bag at all times.	5	1	1
+2	Perfect for Breakfast on the Go	5	2	1
+3	So good, crispy and taste great	5	3	2
+4	They are so perfect to what I enjoy in a chip	5	4	2
+5	Fresh and delicious	5	5	1
+6	Best popcorn ever, fully pops, great buttery taste.	5	6	2
+7	Great flavor and crunch along with milk chocolate.	5	7	1
+8	One of my favorites for chocolate covered pretzels	5	8	1
+9	Would eat it non stop.	5	9	1
+10	They are sweet and moist. Not grainy or crumbly.	4	10	1
+11	Great price for the amount of prunes.	4	11	1
+\.
+
+
+--
+-- Name: temp_comments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rs
+--
+
+SELECT pg_catalog.setval('public.temp_comments_id_seq', 5, true);
+
+
+--
+-- Name: comments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rs
+--
+
+SELECT pg_catalog.setval('public.comments_id_seq', 11, true);
+
+
+--
+-- Name: temp_comments temp_comments_pkey; Type: CONSTRAINT; Schema: public; Owner: rs
+--
+
+ALTER TABLE ONLY public.temp_comments
+    ADD CONSTRAINT temp_comments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: comments comments_pkey; Type: CONSTRAINT; Schema: public; Owner: rs
+--
+
+ALTER TABLE ONLY public.comments
+    ADD CONSTRAINT comments_pkey PRIMARY KEY (id);
+
+
+
+--
+-- Name: temp_comments item; Type: FK CONSTRAINT; Schema: public; Owner: rs
+--
+
+ALTER TABLE ONLY public.temp_comments
+    ADD CONSTRAINT item FOREIGN KEY (item) REFERENCES public.items(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+--
+-- Name: comments item; Type: FK CONSTRAINT; Schema: public; Owner: rs
+--
+
+ALTER TABLE ONLY public.comments
+    ADD CONSTRAINT item FOREIGN KEY (item) REFERENCES public.items(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+
+
+
 
 
 --

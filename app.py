@@ -1,12 +1,14 @@
 import os
+import json
 from flask import Flask,request, abort, jsonify
-from models import commit_session, setup_db, Category, Item
+from models import commit_session, setup_db, Category, Item, Temp_comment, Comment
 from flask_cors import CORS
 from sqlalchemy import insert
 from auth import AuthError, requires_auth
 
 ITEMS_PER_PAGE = 10
-
+TEMP_COMMENTS_PER_PAGE = 5
+COMMENTS_PER_PAGE = 5
 
 def paginate_items(request):
     page = request.args.get("page", 1, type=int)
@@ -14,6 +16,21 @@ def paginate_items(request):
     items = Item.query.order_by(Item.id).limit(
         ITEMS_PER_PAGE).offset(current_index * ITEMS_PER_PAGE).all()
     return [item.format() for item in items]
+
+def paginate_temp_comments(request):
+    page = request.args.get("page", 1, type=int)
+    current_index = page - 1
+    comments = Temp_comment.query.order_by(Temp_comment.id).limit(
+        TEMP_COMMENTS_PER_PAGE).offset(current_index * TEMP_COMMENTS_PER_PAGE).all()
+    return [comment.format() for comment in comments]
+
+def paginate_comments(request):
+    page = request.args.get("page", 1, type=int)
+    current_index = page - 1
+    comments = Comment.query.order_by(Comment.id).limit(
+        COMMENTS_PER_PAGE).offset(current_index * COMMENTS_PER_PAGE).all()
+    return [comment.format() for comment in comments]
+
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -28,6 +45,8 @@ def create_app(test_config=None):
                              "GET,PUT,POST,DELETE,OPTIONS")
         return response
 
+
+    
     @app.route('/categories')
     def get_categories():
         categories = Category.query.order_by(Category.type).all()
@@ -62,18 +81,26 @@ def create_app(test_config=None):
     @app.route('/items', methods=["POST"])
     @requires_auth('post:item')
     def create_item():
+        '''
+        create a new item
+        input:
+        {
+            title: "",
+            brand:""
+            category: int
+        }
+        '''
         body = request.get_json()
         
         new_title = body.get("title")
         new_brand = body.get("brand")
         new_category = body.get("category")
-        new_comment = body.get("comment")
-
-        if new_title is None or new_brand is None or new_category is None or new_comment is None:
+        
+        if new_title is None or new_brand is None or new_category is None:
             abort(422)
 
         try:
-            item = Item(title=new_title, brand=new_brand, category=new_category, comment=new_comment)
+            item = Item(title=new_title, brand=new_brand, category=new_category)
             item.insert()
             
             commit_session()
@@ -93,18 +120,27 @@ def create_app(test_config=None):
     @app.route('/items/<int:item_id>', methods=["PATCH"])
     @requires_auth('patch:item')
     def modify_item(item_id):
+        '''
+        update item basic information
+        input:
+        {
+            title: "",
+            brand: ""
+            category: int
+        }
+
+        '''
         body = request.get_json()
-        print('patch body', body)
         current_item = Item.query.filter(Item.id == item_id)
+        print(current_item)
         if current_item is None:
             abort(404)
 
         try:
-            ret = current_item.update({
+            current_item.update({
                 "title": body.get("title", current_item.one_or_none().format().get('title')),
                 "brand": body.get("brand", current_item.one_or_none().format().get('brand')),
-                "category": body.get("category", current_item.one_or_none().format().get('category')),
-                "comment": body.get("comment", current_item.one_or_none().format().get('comment'))
+                "category": body.get("category", current_item.one_or_none().format().get('category'))
                 }, synchronize_session='fetch')
             
             commit_session()
@@ -120,10 +156,13 @@ def create_app(test_config=None):
         except Exception as ex:
             abort(422)
 
-            
     @app.route('/items/<int:item_id>', methods=["DELETE"])
     @requires_auth('delete:item')
     def delete_item(item_id):
+        '''
+        delete item from database table
+
+        '''
         item = Item.query.filter(
             Item.id == item_id).one_or_none()
 
@@ -145,6 +184,159 @@ def create_app(test_config=None):
         except Exception as ex:
             #print('delete item ', ex)
             abort(422)
+
+
+    @app.route('/user/comments', methods=["POST"])
+    @requires_auth('temp_post:comments')
+    def add_temp_comment():
+        '''
+        add comments to temporary table
+        input:
+        {
+            comment: "",
+            item: int,
+            rating: float,
+            userid: int
+        }
+        '''
+        body = request.get_json()
+        
+        try:
+            new_comment = body.get("comment")
+            new_item = body.get("item")
+            new_rating = body.get("rating")
+            new_userid = body.get("userid")
+
+            comment = Temp_comment(comment=new_comment, item=new_item, rating = new_rating, userid = new_userid)
+            comment.insert()
+            
+            current_comments = paginate_temp_comments(request)
+            
+            cnt_total_items = len(Temp_comment.query.all())
+            
+            return jsonify(
+                {
+                    
+                    "success": True,
+                    "items": current_comments,
+                    "total_items": cnt_total_items,
+                }
+            )
+        except Exception as ex:
+            print(ex)
+            abort(422)
+
+
+    @app.route('/admin/comments/<int:item_id>', methods=["POST"])
+    @requires_auth('post:comments')
+    def add_comment(item_id):
+        '''
+        add comments to database
+        input:
+        {
+            comment: "",
+            item: int,
+            rating: float,
+            userid: int
+        }
+        '''
+        body = request.get_json()
+       
+        new_comment = body.get("comment")
+        new_rating = body.get("rating")
+        updated_item = body.get("item")
+        new_userid = body.get("userid")
+            
+        item = Item.query.filter(Item.id == updated_item).one_or_none()
+        
+        if item is None:
+            abort(404)
+
+        try:
+            comment = Comment(comment=new_comment, item=updated_item, rating = new_rating, userid = new_userid)
+            comment.insert()
+            commit_session()
+            current_comments = paginate_comments(request)
+
+            return jsonify(
+                {
+                    "success": True,
+                    "item": updated_item,
+                    "comments": current_comments,
+                    "total_comments": len(Comment.query.filter(Comment.item == updated_item).all()),
+                }
+            )
+        except Exception as ex:
+            abort(422)
+
+    @app.route('/temp/comments/<int:comment_id>', methods=["DELETE"])
+    @requires_auth('temp_delete:comments')
+    def delete_temp_comment(comment_id):
+        '''
+        delete comment from temporary table
+
+        input:
+        {
+            comment_id: int,
+        }
+        '''
+        comment = Temp_comment.query.filter(
+            Temp_comment.id == comment_id).one_or_none()
+
+        if comment is None:
+            abort(404)
+
+        try:
+            comment.delete()
+            current_comments = paginate_temp_comments(request)
+
+            return jsonify(
+                {
+                    "success": True,
+                    "deleted": comment_id,
+                    "comments": current_comments,
+                    "total_comments": len(Comment.query.all()),
+                }
+            )
+        except Exception as ex:
+            #print('delete item ', ex)
+            abort(422)
+
+
+    @app.route('/admin/comments/<int:comment_id>', methods=["DELETE"])
+    #@requires_auth('delete:comments')
+    def delete_comment(comment_id):
+        '''
+        delete comment from database
+        input:
+        {
+            comment_id: int,
+        }
+        '''
+        comment = Comment.query.filter(
+            Comment.id == comment_id).one_or_none()
+        print('comment, ', comment)
+        if comment is None:
+            abort(404)
+
+        try:
+            comment.delete()
+            commit_session()
+
+            current_comments = paginate_comments(request)
+
+            return jsonify(
+                {
+                    "success": True,
+                    "deleted": comment_id,
+                    "current_comments": current_comments,
+                    "total_comments": len(Comment.query.all())
+                }
+            )
+        except Exception as ex:
+            #print('delete item ', ex)
+            abort(422)
+
 
     @app.errorhandler(404)
     def not_found(error):

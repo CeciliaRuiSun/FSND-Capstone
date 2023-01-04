@@ -82,6 +82,7 @@ ADMIN
 - Permissions: GET `'/categories'`, GET `'/items'`, DELETE `'/items/<int:item_id>'`, PATCH `'/items/<int:item_id>'`
 
 
+
 # Backend - Gourmet App
 
 ## Setting up the Backend
@@ -131,6 +132,18 @@ To run the server, execute:
 ```bash
 FLASK_APP=app.py FLASK_DEBUG=True flask run
 ```
+
+## Testing
+Write at least one test for the success and at least one error behavior of each endpoint using the unittest library.
+
+To deploy the tests, run
+```bash
+dropdb fsnd_test
+createdb fsnd_test
+psql fsnd_test < fsnd.psql
+python test_fsnd.py
+```
+
 
 ### Deploy on Heroku
 
