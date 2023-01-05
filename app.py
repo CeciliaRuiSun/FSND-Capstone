@@ -5,6 +5,7 @@ from models import commit_session, setup_db, Category, Item, Temp_comment, Comme
 from flask_cors import CORS
 from sqlalchemy import insert
 from auth import AuthError, requires_auth
+from user import auth0_create_user
 
 ITEMS_PER_PAGE = 10
 TEMP_COMMENTS_PER_PAGE = 5
@@ -192,6 +193,36 @@ def create_app(test_config=None):
             #print('delete item ', ex)
             abort(422)
 
+    @app.route('/user/create', methods=["POST"])
+    def create_user():
+        '''
+        Create user by post
+        input:
+        {
+            email: "",
+            password: "",
+        }
+        '''
+        body = request.get_json()
+        try:
+            email = body.get("email")
+            password = body.get("password")
+
+            res = auth0_create_user(email, password)
+
+            print(res)
+            print(res.get("auth_user_id"))
+
+            return jsonify(
+                {
+                    "success": True,
+                    "email": res.get("auth0_email"),
+                }
+            )
+        except Exception as ex:
+            # TODO: Remove this
+            print(ex)
+            abort(422)
 
     @app.route('/user/comments', methods=["POST"])
     @requires_auth('temp_post:comments')
