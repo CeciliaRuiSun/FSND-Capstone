@@ -1,10 +1,13 @@
 import os
 import json
 from flask import Flask,request, abort, jsonify, render_template
-from models import commit_session, setup_db, Category, Item, Temp_comment, Comment
+from models import commit_session, Category, Item, Temp_comment, Comment
 from flask_cors import CORS
 from sqlalchemy import insert
+from forms import *
 from auth import AuthError, requires_auth
+from flask_wtf.csrf import CSRFProtect
+from config import setup_db
 
 ITEMS_PER_PAGE = 10
 TEMP_COMMENTS_PER_PAGE = 5
@@ -34,8 +37,11 @@ def paginate_comments(request):
 
 def create_app(test_config=None):
     app = Flask(__name__)
+    csrf = CSRFProtect(app)
+    csrf.init_app(app)
+    app.config.from_object('config')
     setup_db(app)
-    CORS(app)
+    #CORS(app)
 
     @app.after_request
     def after_request(response):
@@ -51,8 +57,8 @@ def create_app(test_config=None):
 
     @app.route('/signup', methods=['GET'])
     def signup():
-        # TODO: Not working yet, need to define forms
-        return render_template('forms/register.html')
+        form = UserForm()
+        return render_template('forms/register.html', form=form)
 
     @app.route('/categories')
     def get_categories():
