@@ -4,7 +4,8 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 
 from app import create_app
-from models import setup_db, Category, Item, Temp_comment, Comment
+from models import Category, Item, Temp_comment, Comment
+from config import *
 
 class FSNDTestCase(unittest.TestCase):
     """This class represents the fsnd test case"""
