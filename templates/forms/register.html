@@ -1,0 +1,37 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Register User{% endblock %}
+{% block content %}
+  <div class="form-wrapper">
+    <form method="post" class="form">
+      {{ form.csrf_token }}
+      <h3 class="form-heading">Register new user</h3>
+      <div class="form-group">
+        <label for="name">Name</label>
+        {{ form.name(class_ = 'form-control', autofocus = true) }}
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        {{ form.email(class_ = 'form-control', autofocus = true) }}
+      </div>
+      <div class="form-group">
+          <label>Location</label>
+          <div class="form-inline">
+            <div class="form-group">
+              {{ form.city(class_ = 'form-control', placeholder='City', autofocus = true) }}
+            </div>
+            <div class="form-group">
+              {{ form.state(class_ = 'form-control', placeholder='State', autofocus = true) }}
+            </div>
+            <div class="form-group">
+              {{ form.country(class_ = 'form-control', placeholder='Country', autofocus = true) }}
+            </div>
+          </div>
+      </div>
+      <div class="form-group">
+          <label for="phone">Phone</label>
+          {{ form.phone(class_ = 'form-control', placeholder='', autofocus = true) }}
+      </div>
+      <input type="submit" value="Signup" class="btn btn-primary btn-lg btn-block">
+    </form>
+  </div>
+{% endblock %}

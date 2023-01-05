@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask,request, abort, jsonify
+from flask import Flask,request, abort, jsonify, render_template
 from models import commit_session, setup_db, Category, Item, Temp_comment, Comment
 from flask_cors import CORS
 from sqlalchemy import insert
@@ -45,8 +45,15 @@ def create_app(test_config=None):
                              "GET,PUT,POST,DELETE,OPTIONS")
         return response
 
+    @app.route('/', methods=['GET', 'POST'])
+    def index():
+        return render_template('pages/home.html')
 
-    
+    @app.route('/signup', methods=['GET'])
+    def signup():
+        # TODO: Not working yet, need to define forms
+        return render_template('forms/register.html')
+
     @app.route('/categories')
     def get_categories():
         categories = Category.query.order_by(Category.type).all()
