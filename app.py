@@ -5,6 +5,7 @@ from models import commit_session, Category, Item, Temp_comment, Comment
 from flask_cors import CORS
 from sqlalchemy import insert
 from forms import *
+from user import auth0_create_user
 from auth import AuthError, requires_auth
 from flask_wtf.csrf import CSRFProtect
 from config import setup_db
@@ -176,6 +177,36 @@ def create_app(test_config=None):
             #print('delete item ', ex)
             abort(422)
 
+    @app.route('/user/create', methods=["POST"])
+    def create_user():
+        '''
+        Create user by post
+        input:
+        {
+            email: "",
+            password: "",
+        }
+        '''
+        body = request.get_json()
+        try:
+            email = body.get("email")
+            password = body.get("password")
+
+            res = auth0_create_user(email, password)
+
+            print(res)
+            print(res.get("auth_user_id"))
+
+            return jsonify(
+                {
+                    "success": True,
+                    "email": res.get("auth0_email"),
+                }
+            )
+        except Exception as ex:
+            # TODO: Remove this
+            print(ex)
+            abort(422)
 
     @app.route('/user/comments', methods=["POST"])
     @requires_auth('temp_post:comments')
