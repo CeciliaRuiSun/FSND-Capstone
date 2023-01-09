@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask,request, abort, jsonify, render_template
+from flask import Flask,request, abort, jsonify, render_template, flash
 from models import commit_session, Category, Item, Temp_comment, Comment
 from flask_cors import CORS
 from sqlalchemy import insert
@@ -34,9 +34,45 @@ def create_app(test_config=None):
     def index():
         return render_template('pages/home.html')
 
-    @app.route('/signup', methods=['GET'])
+    @app.route('/user/create', methods=['GET'])
     def signup():
         form = UserForm()
+        return render_template('forms/register.html', form=form)
+    
+    @app.route('/user/create', methods=['POST'])
+    def post_signup():
+        error = False
+
+        try:
+            form = UserForm(request.form, meta={"csrf": False})
+            print('form ', form)
+            if form.validate():
+                print('ttttttttttttttt')
+                email = form.get("email")
+                password = form.get("password")
+
+                res = auth0_create_user(email, password)
+
+                #print(res)
+                #print(res.get("auth_user_id"))
+
+                return jsonify(
+                    {
+                        "success": True,
+                        "email": res.get("auth0_email"),
+                    }
+                )
+            else:
+                error = True
+
+        except Exception as ex:
+            #print(ex)
+            abort(422)
+
+        if error: flash('Failed. User ' + request.form['username'] + ' was not successfully created.')
+        # on successful db insert, flash success
+        if not error: flash('User ' + request.form['username'] + ' was successfully created!')
+
         return render_template('forms/register.html', form=form)
 
     @app.route('/categories')
@@ -177,36 +213,6 @@ def create_app(test_config=None):
             #print('delete item ', ex)
             abort(422)
 
-    @app.route('/user/create', methods=["POST"])
-    def create_user():
-        '''
-        Create user by post
-        input:
-        {
-            email: "",
-            password: "",
-        }
-        '''
-        body = request.get_json()
-        try:
-            email = body.get("email")
-            password = body.get("password")
-
-            res = auth0_create_user(email, password)
-
-            print(res)
-            print(res.get("auth_user_id"))
-
-            return jsonify(
-                {
-                    "success": True,
-                    "email": res.get("auth0_email"),
-                }
-            )
-        except Exception as ex:
-            # TODO: Remove this
-            print(ex)
-            abort(422)
 
     @app.route('/user/comments', methods=["POST"])
     @requires_auth('temp_post:comments')
