@@ -38,6 +38,6 @@ class UserForm(Form):
     )
 
     connection = StringField(
-        'connection', validators=[DataRequired()]
+        'connection'
     )
 

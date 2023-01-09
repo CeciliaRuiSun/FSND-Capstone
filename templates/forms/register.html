@@ -6,19 +6,23 @@
       {{ form.csrf_token }}
       <h3 class="form-heading">Register new user</h3>
       <div class="form-group">
-        <label for="username">Username</label>
+        <label for="username">Username *</label>
         {{ form.username(class_ = 'form-control', autofocus = true) }}
       </div>
       <div class="form-group">
-        <label for="email">Email</label>
+        <label for="email">Email *</label>
         {{ form.email(class_ = 'form-control', autofocus = true) }}
       </div>
       <div class="form-group">
-        <label for="password">Password</label>
+        <label for="password">Password *</label>
+          <ul>
+            <li>Minimum length of 8</li>
+            <li>Should contain at least one uppercase, one lowercase and one number</li>
+          </ul>
         {{ form.password(class_ = 'form-control', autofocus = true) }}
       </div>
       <div class="form-group">
-        <label for="confirm">Confirm Password</label>
+        <label for="confirm">Confirm Password *</label>
         {{ form.confirm(class_ = 'form-control', autofocus = true) }}
       </div>
       <div class="form-group">

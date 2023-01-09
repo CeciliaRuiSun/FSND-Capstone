@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask,request, abort, jsonify, render_template, flash
+from flask import Flask,request, abort, jsonify, render_template, flash, redirect
 from models import commit_session, Category, Item, Temp_comment, Comment
 from flask_cors import CORS
 from sqlalchemy import insert
@@ -47,9 +47,8 @@ def create_app(test_config=None):
             form = UserForm(request.form, meta={"csrf": False})
             print('form ', form)
             if form.validate():
-                print('ttttttttttttttt')
-                email = form.get("email")
-                password = form.get("password")
+                email = request.form['email']
+                password = request.form['password']
 
                 res = auth0_create_user(email, password)
 
@@ -66,14 +65,17 @@ def create_app(test_config=None):
                 error = True
 
         except Exception as ex:
-            #print(ex)
+            print(ex)
             abort(422)
 
-        if error: flash('Failed. User ' + request.form['username'] + ' was not successfully created.')
-        # on successful db insert, flash success
+        if error: 
+            print('qqqqqqq')
+            flash('Failed. User ' + request.form['username'] + ' was not successfully created.')
+        
         if not error: flash('User ' + request.form['username'] + ' was successfully created!')
 
         return render_template('forms/register.html', form=form)
+        
 
     @app.route('/categories')
     def get_categories():
