@@ -146,7 +146,11 @@ def create_app(test_config=None):
         except Exception as ex:
             abort(422)
         
-    
+    @app.route('/item/search', methods=["POST"])
+    #def search_item():
+        # TODO
+
+
     @app.route('/items/<int:item_id>', methods=["PATCH"])
     @requires_auth('patch:item')
     def modify_item(item_id):

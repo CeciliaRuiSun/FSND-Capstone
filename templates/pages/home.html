@@ -1,13 +1,20 @@
-{% extends 'layouts/main.html' %}
-{% block title %}Snack{% endblock %}
-{% block content %}
-<div class="row">
-	<div class="col-sm-6">
-		<h1>Snack 🍰 </h1>
-		<p class="lead">Where Delicious Snacks meet eaters.</p>
-	</div>
-	<div class="col-sm-6 hidden-sm hidden-xs">
-		<img id="front-splash" src="{{ url_for('static',filename='img/front-splash.jpg') }}" alt="Front Photo of Delicious Snacks" />
+ {% extends 'layouts/main.html' %}   
+
+ {% block content %}
+ <div class="bg-dark text-light p-5 text-center">
+	
+	<div class="container">
+		<div class="d-sm-flex">
+			<div>
+			<h1>Find your happiness for today!</h1>
+			</div>
+			<img 
+			src="{{ url_for('static',filename='img/snack2.jpg') }}" 
+			alt="Copy Right @EuropeSnacks"
+			/>
+	
+		</div>
 	</div>
 </div>
+
 {% endblock %}
