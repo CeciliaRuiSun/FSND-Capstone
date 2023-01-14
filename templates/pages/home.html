@@ -1,19 +1,23 @@
  {% extends 'layouts/main.html' %}   
 
  {% block content %}
- <div class="bg-dark text-light p-5 text-center">
+ <div class=" p-5 text-center">
 	
 	<div class="container">
-		<div class="d-sm-flex">
-			<div>
-			<h1>Find your happiness for today!</h1>
-			</div>
-			<img 
-			src="{{ url_for('static',filename='img/snack2.jpg') }}" 
-			alt="Copy Right @EuropeSnacks"
-			/>
-	
+		
+		<div class="row">
+		<h1>Find your happiness for today!</h1>
 		</div>
+
+		<div class="row">
+		<img 
+		src="{{ url_for('static',filename='img/snack2.jpg') }}" 
+		class="img-fluid"
+		alt="Copy Right @EuropeSnacks"
+		/>
+		</div>
+	
+		
 	</div>
 </div>
 
