@@ -1,12 +1,15 @@
 import os
 import json
-from flask import Flask,request, abort, jsonify, render_template, flash, redirect
+from urllib.parse import quote_plus, urlencode
+
+from flask import Flask,request, abort, jsonify, render_template, flash, redirect, session, url_for
 from models import commit_session, Category, Item, Temp_comment, Comment
 from flask_cors import CORS
 from sqlalchemy import insert
 from forms import *
 from user import auth0_create_user
 from auth import AuthError, requires_auth
+from authlib.integrations.flask_client import OAuth
 from flask_wtf.csrf import CSRFProtect
 from config import setup_db, db
 from pagination import *
@@ -18,6 +21,19 @@ def create_app(test_config=None):
     csrf = CSRFProtect(app)
     csrf.init_app(app)
     app.config.from_object('config')
+
+    oauth = OAuth(app)
+
+    oauth.register(
+        "auth0",
+        client_id=os.getenv("AUTH0_CLIENT_ID"),
+        client_secret=os.getenv("AUTH0_CLIENT_SECRET"),
+        client_kwargs={
+            "scope": "openid profile email",
+        },
+        server_metadata_url=f'https://{os.getenv("AUTH0_DOMAIN")}/.well-known/openid-configuration'
+    )
+
     setup_db(app)
     #CORS(app)
 
@@ -29,9 +45,38 @@ def create_app(test_config=None):
                              "GET,PUT,POST,DELETE,OPTIONS")
         return response
 
+
+    @app.route("/login")
+    def login():
+        return oauth.auth0.authorize_redirect(
+            redirect_uri=url_for("callback", _external=True)
+        )
+
+    @app.route("/login-results", methods=["GET", "POST"])
+    def callback():
+        token = oauth.auth0.authorize_access_token()
+        session["user"] = token
+        session["username"] = "Username:TODO"
+        return redirect("/")
+
+    @app.route("/logout")
+    def logout():
+        session.clear()
+        return redirect(
+            "https://" + os.getenv("AUTH0_DOMAIN")
+            + "/v2/logout?"
+            + urlencode(
+                {
+                    "returnTo": url_for("index", _external=True),
+                    "client_id": os.getenv("AUTH0_CLIENT_ID"),
+                },
+                quote_via=quote_plus,
+            )
+        )
+
     @app.route('/', methods=['GET', 'POST'])
     def index():
-        return render_template('pages/home.html')
+        return render_template('pages/home.html',session = session)
 
     @app.route('/user/create', methods=['GET'])
     def signup():

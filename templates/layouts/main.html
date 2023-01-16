@@ -100,7 +100,12 @@
         </form>
 
         <div class="col-auto text-end">
+          {% if session.username %}
+          <label> {{session.username}} </label>
+          <button type="button" class="btn btn-outline-dark me-2">Logout</button>
+          {% else %}
           <button type="button" class="btn btn-outline-dark me-2">Login</button>
+          {% endif %}
           <button type="button" class="btn btn-dark">Sign-up</button>
         </div>
      

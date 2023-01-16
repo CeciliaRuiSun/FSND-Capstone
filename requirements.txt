@@ -26,3 +26,4 @@ Werkzeug==2.0.1
 zipp==3.11.0
 flask-wtf==0.14.3
 auth0-python
+authlib
