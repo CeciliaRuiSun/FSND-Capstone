@@ -111,8 +111,8 @@ ALTER TABLE ONLY public.items ALTER COLUMN id SET DEFAULT nextval('public.items_
 COPY public.categories (id, type) FROM stdin;
 1	Chips
 2	Cookies
-3	Dried Fruits
-4	Popcorn
+3	Fruits
+4	Popcorns
 5	Pretzels
 6	Cakes
 7	Candies
@@ -136,9 +136,9 @@ COPY public.items (id, title, brand, category) FROM stdin;
 3	Chocolate Sanwich Cookies	OREO	2
 4	Baked Barbecue Potato Crisps	Lay's	1
 5	Peanut Butter Sandwich Cookies	Nutter Butter	2
-6	Blast O Butter Microwave Popcorn?	JOLLY TIME	4
+6	Blast O Butter Microwave Popcorn	JOLLY TIME	4
 7	Peanut Butter Pretzel	Fannie May	5
-8	Milk Chocolate Covered Pretzels?	Flipz	5
+8	Milk Chocolate Covered Pretzels	Flipz	5
 9	Milk Chocolate Dipped Pretzels	Hershey's	5
 10	Ocean Spray original Dried Cranberries	Craisins	3
 11	Amazin Pitted Prunes	Sunsweet	3   

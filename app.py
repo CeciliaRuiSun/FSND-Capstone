@@ -135,20 +135,21 @@ def create_app(test_config=None):
             }
         )
     
+
     @app.route('/categories/<int:category_id>')
-    def get_category_cat(category_id):
+    def get_item_in_category(category_id):
         
-        ret = api_get_category_cat(category_id)
+        ret = api_get_item_in_category(category_id)
     
         if (ret.status_code != 200):
             return ret
 
-        items = json.loads(ret.get_data())['items']
+        cur_items = json.loads(ret.get_data())['items']
         
-        return render_template('pages/items_in_category.html', items=items)
+        return render_template('pages/items_in_category.html', items=cur_items)
 
     @app.route('/api/v1/categories/<int:category_id>')
-    def api_get_category_cat(category_id):
+    def api_get_item_in_category(category_id):
         '''
         get items under the given category
         input:
@@ -166,28 +167,50 @@ def create_app(test_config=None):
         if len(items) == 0:
             abort(404)
         
-        #return items
+        cur_items = []
+        for item in items:
+            cur_items.append({'id':item.id, 'title':item.title, 'brand':item.brand})
+
         return jsonify(
             {
                 "success": True,
                 "category": category_id,
-                "items": {item.id: item.title for item in items}
+                "items": cur_items
             }
         )
 
     @app.route('/items')
     def get_items():
-        current_items = paginate_items(request)
+        
+        ret = api_get_items()
+    
+        if (ret.status_code != 200):
+            return ret
+
+        cur_items = json.loads(ret.get_data())['items']
+        
+        return render_template('pages/items.html', items=cur_items)
+
+
+    @app.route('/api/v1/items')
+    def api_get_items():
+        items = paginate_items(request)
+        print('items ', items)
         categories = Category.query.order_by(Category.type).all()
 
-        if len(current_items) == 0:
+        if len(items) == 0:
             abort(404)
 
+        cur_items = []
+        for item in items:
+            cur_items.append({'id':item['id'], 'title':item['title'], 'brand':item['brand']})
+
+        print(cur_items)
         return jsonify(
             {
                 "success": True,
                 "categories": {category.id: category.type for category in categories},
-                "items": current_items,
+                "items": cur_items,
                 "total_items": len(Item.query.all()),
             }
         )
