@@ -1,0 +1,16 @@
+{% extends 'layouts/main.html' %}
+
+{% block content %}
+<ul class="items">
+	{% for item in items %}
+	<li>
+		<a href="/items/{{ item.id }}">
+			<i class="fas fa-users"></i>
+			<div class="item">
+				<h5>{{ item.title }} {{ item.brand }}</h5>
+			</div>
+		</a>
+	</li>
+	{% endfor %}
+</ul>
+{% endblock %}

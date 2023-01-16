@@ -3,10 +3,11 @@
 ## Gourmet App
 As a foreigner living in the country, who also likes snacks, I often have problems choosing a good snack in front of numorous options. As a result, I developed this app that gathers comments from consumers to help people like me find the right snack they want.
 Gourmet App is used to display various kinds of items by categories, as with comments from consumers. The application function includes:
-1. Display item. An item should have its' brand, category, comments and rating from consumers
+1. Display item. An item should have brand, category, comments and rating from consumers
 2. Update item
 3. Delete item
 4. User registration
+5. User login
 
 ## APIs
 GET `'/categories'`

@@ -8,9 +8,8 @@ from forms import *
 from user import auth0_create_user
 from auth import AuthError, requires_auth
 from flask_wtf.csrf import CSRFProtect
-from config import setup_db
+from config import setup_db, db
 from pagination import *
-
 
 
 
@@ -77,8 +76,8 @@ def create_app(test_config=None):
         return render_template('forms/register.html', form=form)
         
 
-    @app.route('/categories')
-    def get_categories():
+    @app.route('/api/v1/categories')
+    def api_get_categories():
         categories = Category.query.order_by(Category.type).all()
 
         if len(categories) == 0:
@@ -88,6 +87,46 @@ def create_app(test_config=None):
             {
                 "success": True,
                 "categories": {category.id: category.type for category in categories}
+            }
+        )
+    
+    @app.route('/categories/<int:category_id>')
+    def get_category_cat(category_id):
+        
+        ret = api_get_category_cat(category_id)
+    
+        if (ret.status_code != 200):
+            return ret
+
+        items = json.loads(ret.get_data())['items']
+        
+        return render_template('pages/items_in_category.html', items=items)
+
+    @app.route('/api/v1/categories/<int:category_id>')
+    def api_get_category_cat(category_id):
+        '''
+        get items under the given category
+        input:
+        {
+            category_id:int
+        }
+        return:
+        list of items
+        '''
+        try:
+            items = Item.query.filter(Item.category == category_id).all()
+        except Exception as ex:
+            abort(422)
+
+        if len(items) == 0:
+            abort(404)
+        
+        #return items
+        return jsonify(
+            {
+                "success": True,
+                "category": category_id,
+                "items": {item.id: item.title for item in items}
             }
         )
 

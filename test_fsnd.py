@@ -46,6 +46,20 @@ class FSNDTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data["success"], False)
     
+    def test_get_items_in_category(self):
+        res = self.client().get("/api/v1/categories/1")
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+    
+    def test_get_items_in_category_not_exist(self):
+        res = self.client().get("/api/v1/categories/100")
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+
     def test_get_paginated_items(self):
         res = self.client().get("/items")
         data = json.loads(res.data)

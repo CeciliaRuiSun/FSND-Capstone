@@ -127,3 +127,62 @@ class Comment(db.Model):
             'item': self.item,
             'userid': self.userid
             }
+
+
+class Taste(db.Model):
+    __tablename__ = 'tastes'
+
+    id = Column(Integer, primary_key=True)
+    taste = Column(String)
+    item = Column(Integer)
+
+    def __init__(self, taste, item):
+        self.taste = taste
+        self.item = item
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+        
+    def format(self):
+        return {
+            'id': self.id,
+            'taste': self.taste,
+            'item': self.item
+            }
+
+class Holiday(db.Model):
+    __tablename__ = 'holidays'
+
+    id = Column(Integer, primary_key=True)
+    holiday = Column(String)
+    item = Column(Integer)
+    
+    def __init__(self, holiday, item):
+        self.holiday = holiday
+        self.item = item
+        
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+        
+    def format(self):
+        return {
+            'id': self.id,
+            'holiday': self.holiday,
+            'item': self.item
+            }
