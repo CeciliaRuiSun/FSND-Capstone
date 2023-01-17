@@ -2,7 +2,7 @@ import os
 import json
 from urllib.parse import quote_plus, urlencode
 
-from flask import Flask,request, abort, jsonify, render_template, flash, redirect, session, url_for
+from flask import Flask,request, abort, make_response, jsonify, render_template, flash, redirect, session, url_for
 from models import commit_session, Category, Item, Temp_comment, Comment
 from flask_cors import CORS
 from sqlalchemy import insert
@@ -109,11 +109,9 @@ def create_app(test_config=None):
                 error = True
 
         except Exception as ex:
-            print(ex)
             abort(422)
 
         if error: 
-            print('qqqqqqq')
             flash('Failed. User ' + request.form['username'] + ' was not successfully created.')
         
         if not error: flash('User ' + request.form['username'] + ' was successfully created!')
@@ -140,12 +138,12 @@ def create_app(test_config=None):
     def get_item_in_category(category_id):
         
         ret = api_get_item_in_category(category_id)
-    
-        if (ret.status_code != 200):
-            return ret
+
+        if (ret.status_code == 404):
+            return render_template('errors/404.html')
 
         cur_items = json.loads(ret.get_data())['items']
-        
+
         return render_template('pages/items_in_category.html', items=cur_items)
 
     @app.route('/api/v1/categories/<int:category_id>')
@@ -165,7 +163,7 @@ def create_app(test_config=None):
             abort(422)
 
         if len(items) == 0:
-            abort(404)
+            return make_response(jsonify(items), 404)
         
         cur_items = []
         for item in items:
@@ -184,33 +182,37 @@ def create_app(test_config=None):
         
         ret = api_get_items()
     
-        if (ret.status_code != 200):
-            return ret
-
-        cur_items = json.loads(ret.get_data())['items']
+        cur_items = json.loads(ret.get_data())['data']
         
-        return render_template('pages/items.html', items=cur_items)
+        if not cur_items: 
+            return render_template('errors/404.html')
+        
+        return render_template('pages/items.html', all_items=cur_items)
 
 
     @app.route('/api/v1/items')
     def api_get_items():
-        items = paginate_items(request)
-        print('items ', items)
+        '''
+        return: "data" :[ {category: "category", items:[{id: "id", title: "t", brand: "b"}, {}]},{}]
+        '''
+        #items = paginate_items(request)
+        
         categories = Category.query.order_by(Category.type).all()
+        data = []
+        for category_record in categories:
+            cur_data={}
+            cur_data["category"] = category_record.type
+            cur_items=[]
+            all_items = Item.query.filter(Item.category==category_record.id).all()
+            for item in all_items:
+                cur_items.append({'id':item.id, 'title':item.title, 'brand':item.brand})
+            cur_data["snacks"] = cur_items
+            data.append(cur_data)
 
-        if len(items) == 0:
-            abort(404)
-
-        cur_items = []
-        for item in items:
-            cur_items.append({'id':item['id'], 'title':item['title'], 'brand':item['brand']})
-
-        print(cur_items)
         return jsonify(
             {
                 "success": True,
-                "categories": {category.id: category.type for category in categories},
-                "items": cur_items,
+                "data": data,
                 "total_items": len(Item.query.all()),
             }
         )
