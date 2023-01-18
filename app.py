@@ -143,8 +143,10 @@ def create_app(test_config=None):
             return render_template('errors/404.html')
 
         cur_items = json.loads(ret.get_data())['items']
+        cur_category = json.loads(ret.get_data())['category']
+        print(cur_category)
 
-        return render_template('pages/items_in_category.html', items=cur_items)
+        return render_template('pages/items_in_category.html', items=cur_items, category=cur_category)
 
     @app.route('/api/v1/categories/<int:category_id>')
     def api_get_item_in_category(category_id):
@@ -159,10 +161,11 @@ def create_app(test_config=None):
         '''
         try:
             items = Item.query.filter(Item.category == category_id).all()
+            category_type = Category.query.filter(Category.id == category_id).one_or_none()
         except Exception as ex:
             abort(422)
 
-        if len(items) == 0:
+        if len(items) is None or category_type is None:
             return make_response(jsonify(items), 404)
         
         cur_items = []
@@ -172,7 +175,7 @@ def create_app(test_config=None):
         return jsonify(
             {
                 "success": True,
-                "category": category_id,
+                "category": category_type.type,
                 "items": cur_items
             }
         )
@@ -193,6 +196,7 @@ def create_app(test_config=None):
     @app.route('/api/v1/items')
     def api_get_items():
         '''
+        get all items in database
         return: "data" :[ {category: "category", items:[{id: "id", title: "t", brand: "b"}, {}]},{}]
         '''
         #items = paginate_items(request)

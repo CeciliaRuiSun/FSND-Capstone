@@ -1,4 +1,5 @@
 {% extends 'layouts/main.html' %}
+{% block title %}Snacks | All{% endblock %}
 <!-- [ {category: "category", items:[{id: "id", title: "t", brand: "b"]}, {}},{}]-->
 {% block content %}
 {% for one_category in all_items %}
@@ -7,9 +8,9 @@
 		{% for snack in one_category.snacks %}
 		<li>
 			<a href="/item/{{ snack.id }}">
-				<i class="fas fa-music"></i>
+				
 				<div class="item">
-					<h5>{{ snack.title }} {{ snack.brand }}</h5>
+					<h5>{{ snack.title }} - {{ snack.brand }}</h5>
 					
 				</div>
 			</a>
