@@ -221,6 +221,65 @@ def create_app(test_config=None):
             }
         )
     
+    @app.route('/items/<int:item_id>')
+    def get_an_item(item_id):
+        
+        ret = api_an_item(item_id)
+    
+        cur_item = json.loads(ret.get_data())['data']
+        
+        if not cur_item: 
+            return render_template('errors/404.html')
+        
+        return render_template('pages/single_item.html', Snack=cur_item)
+
+
+    @app.route('/api/v1/items/<int:item_id>')
+    def api_an_item(item_id):
+        """
+        get a snack's detail data
+
+        input: item_id: int
+        """
+        cur_item={}
+        try:
+            Item = Item.query.filter(Item.id == item_id).one_or_none()
+
+            if not Item: 
+                return render_template('errors/404.html')
+
+            Category = Category.query.filter(
+                Category.id == Item.category).one_or_none()
+            Taste = Taste.query.filter(Taste.item == item_id).all()
+            Holiday = Holiday.query.filter(Holiday.item == item_id).all()
+
+            combined_taste=''
+            combined_holiday=''
+
+            for taste in Taste:
+                combined_taste += ' ' + taste
+
+            for holiday in Holiday:
+                combined_holiday += ' ' + holiday
+
+            cur_item['Titlet'] = Item.title
+            cur_item['brand'] = Item.brand
+            cur_item['category'] = Category.type
+            cur_item['taste'] = combined_taste
+            cur_item['holiday'] = combined_holiday
+
+        except:
+            return render_template('errors/422.html')
+        
+        return jsonify(
+            {
+                "success": True,
+                "data": cur_item,
+            }
+        )
+
+
+
     @app.route('/items', methods=["POST"])
     @requires_auth('post:item')
     def create_item():
