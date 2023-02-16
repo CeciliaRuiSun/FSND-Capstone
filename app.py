@@ -3,7 +3,7 @@ import json
 from urllib.parse import quote_plus, urlencode
 
 from flask import Flask,request, abort, make_response, jsonify, render_template, flash, redirect, session, url_for
-from models import commit_session, Category, Item, Temp_comment, Comment
+from models import *
 from flask_cors import CORS
 from sqlalchemy import insert
 from forms import *
@@ -144,8 +144,7 @@ def create_app(test_config=None):
 
         cur_items = json.loads(ret.get_data())['items']
         cur_category = json.loads(ret.get_data())['category']
-        print(cur_category)
-
+        
         return render_template('pages/items_in_category.html', items=cur_items, category=cur_category)
 
     @app.route('/api/v1/categories/<int:category_id>')
@@ -224,9 +223,11 @@ def create_app(test_config=None):
     @app.route('/snack/<int:item_id>')
     def get_an_item(item_id):
         
+        
         ret = api_an_item(item_id)
         
         cur_item = json.loads(ret.get_data())['data']
+        print('cur_item', cur_item)
         
         if not cur_item: 
             return render_template('errors/404.html')
@@ -243,9 +244,10 @@ def create_app(test_config=None):
         """
         cur_item={}
         try:
-            Item = Item.query.filter(Item.id == item_id).one_or_none()
-
-            if not Item: 
+            
+            snack = Item.query.filter(Item.id == item_id).one_or_none()
+            
+            if not snack: 
                 return jsonify(
             {
                 "success": False,
@@ -253,27 +255,28 @@ def create_app(test_config=None):
             }
         )
 
-            Category = Category.query.filter(
-                Category.id == Item.category).one_or_none()
-            Taste = Taste.query.filter(Taste.item == item_id).all()
-            Holiday = Holiday.query.filter(Holiday.item == item_id).all()
+            category = Category.query.filter(
+                Category.id == snack.category).one_or_none()
+            taste = Taste.query.filter(Taste.item == item_id).all()
+            holiday = Holiday.query.filter(Holiday.item == item_id).all()
 
             combined_taste=''
             combined_holiday=''
 
-            for taste in Taste:
-                combined_taste += ' ' + taste
+            for tst in taste:
+                combined_taste += ' ' + tst
 
-            for holiday in Holiday:
-                combined_holiday += ' ' + holiday
+            for day in holiday:
+                combined_holiday += ' ' + day
 
-            cur_item['Titlet'] = Item.title
-            cur_item['brand'] = Item.brand
-            cur_item['category'] = Category.type
+            cur_item['title'] = snack.title
+            cur_item['brand'] = snack.brand
+            cur_item['category'] = category.type
             cur_item['taste'] = combined_taste
             cur_item['holiday'] = combined_holiday
 
-        except:
+        except Exception as ex:
+            print(ex)
             return jsonify(
             {
                 "success": False,
@@ -348,7 +351,7 @@ def create_app(test_config=None):
         '''
         body = request.get_json()
         current_item = Item.query.filter(Item.id == item_id)
-        print(current_item)
+        
         if current_item is None:
             abort(404)
 
@@ -398,7 +401,7 @@ def create_app(test_config=None):
                 }
             )
         except Exception as ex:
-            #print('delete item ', ex)
+            
             abort(422)
 
 
@@ -439,7 +442,7 @@ def create_app(test_config=None):
                 }
             )
         except Exception as ex:
-            print(ex)
+            
             abort(422)
 
 
