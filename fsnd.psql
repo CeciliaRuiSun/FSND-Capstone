@@ -62,7 +62,8 @@ CREATE TABLE public.items (
     id integer NOT NULL,
     title text,
     brand text,
-    category integer
+    category integer,
+    img text
 );
 
 
@@ -130,18 +131,18 @@ COPY public.categories (id, type) FROM stdin;
 -- Data for Name: items; Type: TABLE DATA; Schema: public; Owner: rs
 --
 
-COPY public.items (id, title, brand, category) FROM stdin;
-1	Nacho Cheese Flavored Tortilla Chips	Doritos	1
-2	Cranberry Orange Breakfast Biscuits	belVita	2
-3	Chocolate Sanwich Cookies	OREO	2
-4	Baked Barbecue Potato Crisps	Lay's	1
-5	Peanut Butter Sandwich Cookies	Nutter Butter	2
-6	Blast O Butter Microwave Popcorn	JOLLY TIME	4
-7	Peanut Butter Pretzel	Fannie May	5
-8	Milk Chocolate Covered Pretzels	Flipz	5
-9	Milk Chocolate Dipped Pretzels	Hershey's	5
-10	Ocean Spray original Dried Cranberries	Craisins	3
-11	Amazin Pitted Prunes	Sunsweet	3   
+COPY public.items (id, title, brand, category, img) FROM stdin;
+1	Nacho Cheese Flavored Tortilla Chips	Doritos	1	snack-cat1-id1
+2	Cranberry Orange Breakfast Biscuits	belVita	2	snack-cat2-id2
+3	Chocolate Sanwich Cookies	OREO	2	snack-cat2-id3
+4	Baked Barbecue Potato Crisps	Lay's	1	snack-cat1-id4
+5	Peanut Butter Sandwich Cookies	Nutter Butter	2	snack-cat2-id5
+6	Blast O Butter Microwave Popcorn	JOLLY TIME	4	snack-cat4-id6
+7	Peanut Butter Pretzel	Fannie May	5	snack-cat5-id7
+8	Milk Chocolate Covered Pretzels	Flipz	5	snack-cat5-id8
+9	Milk Chocolate Dipped Pretzels	Hershey's	5	snack-cat5-id9
+10	Ocean Spray original Dried Cranberries	Craisins	3	snack-cat3-id10
+11	Amazin Pitted Prunes	Sunsweet	3	snack-cat3-id11
 \.
 
 

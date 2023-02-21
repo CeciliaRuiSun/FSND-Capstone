@@ -46,6 +46,12 @@ def create_app(test_config=None):
         return response
 
 
+    @app.route('/home')
+    def get_home():
+        
+        return render_template('pages/home.html')
+
+
     @app.route("/login")
     def login():
         return oauth.auth0.authorize_redirect(
@@ -223,16 +229,18 @@ def create_app(test_config=None):
     @app.route('/snack/<int:item_id>')
     def get_an_item(item_id):
         
-        
         ret = api_an_item(item_id)
         
         cur_item = json.loads(ret.get_data())['data']
-        print('cur_item', cur_item)
-        
+
         if not cur_item: 
             return render_template('errors/404.html')
         
-        return render_template('pages/single_item.html', Snack=cur_item)
+        
+        img = cur_item['img'] 
+        
+        
+        return render_template('pages/single_item.html', Snack=cur_item, Img = img)
 
 
     @app.route('/api/v1/snack/<int:item_id>')
@@ -257,23 +265,24 @@ def create_app(test_config=None):
 
             category = Category.query.filter(
                 Category.id == snack.category).one_or_none()
-            taste = Taste.query.filter(Taste.item == item_id).all()
-            holiday = Holiday.query.filter(Holiday.item == item_id).all()
+            tastes = Taste.query.filter(Taste.item == item_id).all()
+            holidays = Holiday.query.filter(Holiday.item == item_id).all()
 
-            combined_taste=''
-            combined_holiday=''
+            combined_taste=[]
+            combined_holiday=[]
 
-            for tst in taste:
-                combined_taste += ' ' + tst
+            for tst in tastes:
+                combined_taste.append(tst.taste)
 
-            for day in holiday:
-                combined_holiday += ' ' + day
+            for day in holidays:
+                combined_holiday.append(day.holiday)
 
             cur_item['title'] = snack.title
             cur_item['brand'] = snack.brand
             cur_item['category'] = category.type
-            cur_item['taste'] = combined_taste
-            cur_item['holiday'] = combined_holiday
+            cur_item['img'] = snack.img
+            cur_item['taste'] = ', '.join(combined_taste)
+            cur_item['holiday'] = ', '.join(combined_holiday)
 
         except Exception as ex:
             print(ex)

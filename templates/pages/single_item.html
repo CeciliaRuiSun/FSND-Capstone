@@ -4,22 +4,31 @@
 {% block content %}
 <ul class="items">
 	
-	<li>	
-		<div class="item">
-			<h5>Snack: {{ Snack.title }}</h5>
-            <h5>Brand: {{ Snack.brand }}</h5>
-            <h5>Category: {{ Snack.category }}</h5>
-            <h5>Taste: {{ Snack.taste }}</h5>
-            <h5>Holiday: {{ Snack.holiday }}</h5>
-            <h5>Comments</h5>
+	<li>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h4>{{ Snack.title }} - {{ Snack.brand }}</h4>
+                    <p>Category: {{ Snack.category }}</p>
+                    <p>Taste: {{ Snack.taste }}</p>
+                    <p>Holiday: {{ Snack.holiday }}</p>
+                    <img id="item-splash" src="{{ url_for('static',filename = 'img/' + Img + '.png') }}" alt="">
+                    
+                    <h4>Brief summary from the AI</h4>
+                </div>
+                    
+                <div class="col">
+                    <h4>{{ Snack.title }}</h4>
+
+                    {% for comment in Snack.comments %}
+                    <li>
+                        <p>{{ comment }}</p>
+                    </li>
+                    {% endfor %}
+                </div> 
             
-            {% for comment in Snack.comments %}
-                <li>
-                    <p>{{ comment }}</p>
-                </li>
-            {% endfor %}
-        
-		</div>
+            </div>
+        </div>	
 		
 	</li>
 	

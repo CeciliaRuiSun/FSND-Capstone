@@ -33,11 +33,13 @@ class Item(db.Model):
     title = Column(String)
     brand = Column(String)
     category = Column(Integer)
+    img = Column(String)
 
-    def __init__(self, title, brand, category, comment):
+    def __init__(self, title, brand, category, img):
         self.title = title
         self.brand = brand
         self.category = category
+        self.img = img
 
     def insert(self):
         db.session.add(self)
@@ -56,6 +58,7 @@ class Item(db.Model):
             'title': self.title,
             'brand': self.brand,
             'category': self.category,
+            'img': self.img
             }
 
 class Temp_comment(db.Model):
